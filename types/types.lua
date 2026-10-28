@@ -50,6 +50,18 @@
 ---@field description? string @ What a printed sheet's item shows in the inventory
 ---@field car? string @ The car's name on a printed sheet, kept off label, which ox_inventory shows as the item's name
 
+---@class DynoPrintEntry @ A saved run in the list at a dyno's screen
+---@field rowId integer
+---@field plate string
+---@field label? string
+---@field drive DynoDrive
+---@field engineKw number
+---@field wheelKw number
+---@field wheelNm number
+---@field powerRpm number
+---@field torqueRpm number
+---@field date string @ As the server prints it, since clients have no os.date
+
 ---@class DynoRunCheckData
 ---@field plyId PlayerId
 ---@field dynoId integer

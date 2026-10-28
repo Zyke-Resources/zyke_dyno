@@ -1,5 +1,5 @@
--- The point at each dyno's screen that prints its last result, a zyke_lib interest point or a target option, see
--- interaction in shared/config.lua. The server checks every print again in server/share.lua
+-- The point at each dyno's screen that lists its last runs to print, a zyke_lib interest point or a target option,
+-- see interaction in shared/config.lua. The server checks every list and print again in server/share.lua
 
 local settings = Config.Settings.dyno
 if (not settings.printout.enabled) then return end
@@ -25,11 +25,14 @@ local markedKey = ""
 ---@type table<integer, integer> @ The entity holding each dyno's target option, by dyno id
 local targets = {}
 
--- The dyno has a result between runs and the player's job may use it
+-- The list is open, so a second press does not stack another
+local listing = false
+
+-- The dyno stands between runs and the player's job may use it
 ---@param dyno ZykeDyno
 ---@return boolean mayPrint
 local function mayPrint(dyno)
-    if (not dyno.last or dyno.run) then return false end
+    if (dyno.run) then return false end
 
     local jobs = dyno.jobs or settings.jobs
 
@@ -49,9 +52,60 @@ local function getSpot(dynoId, dyno)
     return set.bed, DynoGeometry.getPrintFloor(dyno) + vec3(0.0, 0.0, bareHeight)
 end
 
+---@param entry DynoPrintEntry
+---@return ContextOption option
+local function getOption(entry)
+    local units = settings.units
+    local power, torque = T("unit:" .. units.power), T("unit:" .. units.torque)
+
+    return {
+        title = entry.label or entry.plate,
+        description = ("%s  |  %.0f %s  |  %s"):format(entry.plate, DynoFormula.toPowerUnit(entry.wheelKw), power, entry.date),
+        icon = "print",
+        args = entry.rowId,
+        metadata = {
+            {label = T("nui:plate"), value = entry.plate},
+            {label = T("nui:peakPower"), value = ("%.0f %s %s %.0f %s"):format(DynoFormula.toPowerUnit(entry.wheelKw), power, T("nui:at"), entry.powerRpm, T("nui:rpm"))},
+            {label = T("nui:peakTorque"), value = ("%.0f %s %s %.0f %s"):format(DynoFormula.toTorqueUnit(entry.wheelNm), torque, T("nui:at"), entry.torqueRpm, T("nui:rpm"))},
+            {label = T("nui:engine"), value = ("%.0f %s"):format(DynoFormula.toPowerUnit(entry.engineKw), power)},
+            {label = T("nui:drivetrain"), value = entry.drive},
+            {label = T("nui:date"), value = entry.date},
+        },
+    }
+end
+
+-- The run the player picks from the dyno's last runs, newest first
 ---@param dynoId integer
-local function printSheet(dynoId)
-    TriggerServerEvent("zyke_dyno:PrintSheet", dynoId)
+---@return integer? rowId
+local function pickRun(dynoId)
+    local entries = Z.callback.request("zyke_dyno:GetPrintList", nil, dynoId)
+    if (not entries) then return nil end
+    if (#entries == 0) then Z.notify("noSheets") return nil end
+
+    local options = {}
+
+    for i = 1, #entries do
+        options[i] = getOption(entries[i])
+    end
+
+    local rowId = Z.openContext({title = T("title:sheets"), description = T("menu:sheetsHint"), icon = "print", options = options})
+
+    return math.type(rowId) == "integer" and rowId or nil
+end
+
+---@param dynoId integer
+local function openList(dynoId)
+    if (listing) then return end
+
+    listing = true
+
+    local rowId = pickRun(dynoId)
+
+    listing = false
+
+    if (not rowId) then return end
+
+    TriggerServerEvent("zyke_dyno:PrintSheet", dynoId, rowId)
 end
 
 local function clearPoints()
@@ -116,7 +170,7 @@ local function onPrintKey()
     local dyno = GetDynos()[dynoId]
     if (not dyno or not mayPrint(dyno)) then Z.shakeInterestPoint(markerSet, pointId) return end
 
-    printSheet(dynoId)
+    openList(dynoId)
 end
 
 ---@param dynoId integer
@@ -133,8 +187,11 @@ local function addTarget(dynoId, entity)
 
             return dyno ~= nil and mayPrint(dyno)
         end,
+        -- The list waits on the server, which the target resource's handler may not allow
         onSelect = function()
-            printSheet(dynoId)
+            CreateThread(function()
+                openList(dynoId)
+            end)
         end,
     }}})
 end

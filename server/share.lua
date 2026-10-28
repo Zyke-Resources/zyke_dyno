@@ -1,4 +1,4 @@
--- Printing result sheets at a dyno's screen, from the result the server keeps on the dyno, never what a client
+-- Printing result sheets at a dyno's screen, from the runs the server saved on that dyno, never what a client
 -- sends. The spot is the one client/printout.lua marks, so change both together
 
 local settings = Config.Settings.dyno
@@ -6,6 +6,9 @@ local printout = settings.printout
 
 -- Metres from the floor under the print point, a little over the client's reach
 local printReach = 4.0
+
+-- Runs the list at the screen holds at most, newest first
+local listLimit = 25
 
 -- Milliseconds between two prints by one player
 local printCooldownMs = 2000
@@ -49,12 +52,12 @@ local function describeItem(sheet)
     return table.concat(lines, "  \n")
 end
 
--- The dyno has a result between runs, the player stands at its screen and their job may use it
+-- The dyno stands between runs, the player stands at its screen and their job may use it
 ---@param plyId PlayerId
 ---@param dyno ZykeDyno
 ---@return boolean mayPrint
 local function mayPrint(plyId, dyno)
-    if (not dyno.last or dyno.run) then return false end
+    if (dyno.run) then return false end
 
     local floor = DynoGeometry.toWorld(dyno, DynoGeometry.getPrintFloor(dyno))
     if (#(GetEntityCoords(GetPlayerPed(plyId)).xy - floor.xy) > printReach) then return false end
@@ -64,19 +67,63 @@ local function mayPrint(plyId, dyno)
     return not jobs or Z.isJob(plyId, jobs)
 end
 
-if (printout.enabled) then
-    ---@param dynoId integer
-    RegisterNetEvent("zyke_dyno:PrintSheet", function(dynoId)
-        local plyId = source
-        local dyno = GetDynos()[dynoId]
-        if (not dyno or not mayPrint(plyId, dyno) or isWaiting(plyId)) then return end
+---@param dyno ZykeDyno
+---@param rowId integer
+---@return DynoSheet? sheet
+local function getRun(dyno, rowId)
+    if (dyno.last and dyno.last.rowId == rowId) then return dyno.last end
 
-        local metadata = Z.table.copy(dyno.last)
+    return DynoDatabase.getDynoRun(DynoDatabase.getKey(dyno), rowId)
+end
+
+if (printout.enabled) then
+    -- The dyno's last runs as the list at its screen shows them, without their curves
+    ---@param plyId PlayerId
+    ---@param dynoId integer
+    ---@return DynoPrintEntry[]? entries
+    Z.callback.register("zyke_dyno:GetPrintList", function(plyId, dynoId)
+        local dyno = GetDynos()[tonumber(dynoId) or 0]
+        if (not dyno or not mayPrint(plyId, dyno)) then return nil end
+
+        local runs = DynoDatabase.getDynoRuns(DynoDatabase.getKey(dyno), listLimit)
+        local entries = {}
+
+        for i = 1, #runs do
+            local run = runs[i]
+
+            entries[i] = {
+                rowId = run.rowId,
+                plate = run.plate,
+                label = run.label,
+                drive = run.drive,
+                engineKw = run.engineKw,
+                wheelKw = run.wheelKw,
+                wheelNm = run.wheelNm,
+                powerRpm = run.powerRpm,
+                torqueRpm = run.torqueRpm,
+                date = os.date("%Y-%m-%d %H:%M", run.date),
+            }
+        end
+
+        return entries
+    end)
+
+    ---@param dynoId integer
+    ---@param rowId integer
+    RegisterNetEvent("zyke_dyno:PrintSheet", function(dynoId, rowId)
+        local plyId = source
+        local dyno = GetDynos()[tonumber(dynoId) or 0]
+        if (not dyno or math.type(rowId) ~= "integer" or not mayPrint(plyId, dyno) or isWaiting(plyId)) then return end
+
+        local sheet = getRun(dyno, rowId)
+        if (not sheet) then Z.notify(plyId, "sheetGone") return end
+
+        local metadata = Z.table.copy(sheet)
 
         -- ox_inventory names an item by its metadata's label, which would show the car's name instead of the sheet's
         metadata.car, metadata.label = metadata.label, nil
         metadata.compare = nil
-        metadata.description = describeItem(dyno.last)
+        metadata.description = describeItem(sheet)
 
         if (not Z.addItem(plyId, printout.item, 1, metadata)) then Z.notify(plyId, "printFailed") return end
 

@@ -76,17 +76,17 @@ local function fromRows(rows)
 end
 
 ---@param sheet DynoSheet
+---@return integer? rowId
 function DynoDatabase.save(sheet)
     waitReady()
 
     local dyno = sheet.dynoId and GetDynos()[sheet.dynoId]
-
-    MySQL.insert.await("INSERT INTO `zyke_dyno_runs` (`plate`, `dyno`, `model`, `label`, `drive`, `engine_kw`, `wheel_kw`, `wheel_nm`, `power_rpm`, `torque_rpm`, `curve`, `driver`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+    local rowId = MySQL.insert.await("INSERT INTO `zyke_dyno_runs` (`plate`, `dyno`, `model`, `label`, `drive`, `engine_kw`, `wheel_kw`, `wheel_nm`, `power_rpm`, `torque_rpm`, `curve`, `driver`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         sheet.plate, dyno and DynoDatabase.getKey(dyno), sheet.model, sheet.label, sheet.drive, sheet.engineKw, sheet.wheelKw, sheet.wheelNm, sheet.powerRpm, sheet.torqueRpm, json.encode(sheet.curve), Z.getIdentifier(sheet.driver),
     })
 
     local keep = settings.historyPerPlate
-    if (keep <= 0) then return end
+    if (keep <= 0) then return rowId end
 
     -- The first run stays, since it is the car's stock sheet that later runs are laid over
     MySQL.update.await([[
@@ -96,6 +96,8 @@ function DynoDatabase.save(sheet)
             ) AS `newest`
         ) AND `id` <> (SELECT `id` FROM (SELECT MIN(`id`) AS `id` FROM `zyke_dyno_runs` WHERE `plate` = ?) AS `first`)
     ]], {sheet.plate, sheet.plate, keep, sheet.plate})
+
+    return rowId
 end
 
 ---@param plate string
@@ -115,6 +117,18 @@ function DynoDatabase.getDynoRuns(dynoKey, limit)
     waitReady()
 
     return fromRows(MySQL.query.await("SELECT `id`, `plate`, `model`, `label`, `drive`, `engine_kw`, `wheel_kw`, `wheel_nm`, `power_rpm`, `torque_rpm`, `curve`, UNIX_TIMESTAMP(`created`) AS `date` FROM `zyke_dyno_runs` WHERE `dyno` = ? ORDER BY `id` DESC LIMIT ?", {dynoKey, limit}) or {})
+end
+
+-- One run saved on the dyno, by its key from DynoDatabase.getKey
+---@param dynoKey string
+---@param rowId integer
+---@return DynoSheet? sheet
+function DynoDatabase.getDynoRun(dynoKey, rowId)
+    waitReady()
+
+    local row = MySQL.single.await("SELECT `id`, `plate`, `model`, `label`, `drive`, `engine_kw`, `wheel_kw`, `wheel_nm`, `power_rpm`, `torque_rpm`, `curve`, UNIX_TIMESTAMP(`created`) AS `date` FROM `zyke_dyno_runs` WHERE `dyno` = ? AND `id` = ?", {dynoKey, rowId})
+
+    return row and fromRow(row)
 end
 
 ---@param dynoKey string

@@ -188,6 +188,9 @@ local function finishRun(dynoId, run)
     letGoLater(run.netId)
 
     DynoResults.finish(result)
+
+    -- Lets a reprint of this run use the full sheet, which keeps the gear and speed the history leaves out
+    if (dyno.last and dyno.last.runId == result.runId) then dyno.last.rowId = result.rowId end
 end
 
 -- Watches a running car and its driver, and stops the run as soon as either can not go on, or when the driver

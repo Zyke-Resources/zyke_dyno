@@ -72,7 +72,8 @@ end
 
 ---@param sheet DynoSheet
 function DynoResults.finish(sheet)
-    DynoDatabase.save(sheet)
+    sheet.rowId = DynoDatabase.save(sheet)
+
     OnDynoRunFinished(sheet)
     TriggerEvent("zyke_dyno:OnRunFinished", DynoResults.getSummary(sheet))
 end

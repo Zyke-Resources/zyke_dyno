@@ -87,9 +87,9 @@ Config.Settings = {
         jobs = nil,
         -- Runs kept per plate in the database, oldest first out. 0 keeps every run
         historyPerPlate = 25,
-        -- The result sheet as an item, printed at a dyno's screen by anyone whose job may run that dyno, from the last
-        -- result the screen shows. A dyno without a screen prints where its screen would stand on its left. The item
-        -- has to exist in your inventory; using it shows the sheet
+        -- The result sheet as an item, printed at a dyno's screen by anyone whose job may run that dyno, from a list of
+        -- the last 25 runs on that dyno, newest first. A dyno without a screen prints where its screen would stand on
+        -- its left. The item has to exist in your inventory; using it shows the sheet
         printout = {enabled = true, item = "dyno_sheet"},
         -- How players print at the screen:
         -- "point" marks it with a zyke_lib interest point and its key
