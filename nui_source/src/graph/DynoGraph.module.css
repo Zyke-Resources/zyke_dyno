@@ -1,0 +1,76 @@
+/* The graph's lines and text. Power is Zyke's blue and torque its orange; the runs it is laid over are the same
+   colours, dimmer */
+.graph {
+    display: block;
+    overflow: visible;
+    font-family: var(--font);
+}
+
+.grid {
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+}
+
+.tick {
+    fill: rgba(255, 255, 255, 0.55);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.axis {
+    fill: rgba(255, 255, 255, 0.75);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.power {
+    fill: rgb(25, 118, 210);
+}
+
+.torque {
+    fill: rgb(245, 124, 0);
+}
+
+.line {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.powerLine {
+    stroke: rgb(25, 118, 210);
+}
+
+.torqueLine {
+    stroke: rgb(245, 124, 0);
+}
+
+.live .line {
+    stroke-width: 4;
+}
+
+.previous .line {
+    stroke-width: 2.5;
+    stroke-dasharray: 10 7;
+    opacity: 0.5;
+}
+
+.first .line {
+    stroke-width: 2;
+    stroke-dasharray: 3 6;
+    opacity: 0.4;
+}
+
+.powerHead {
+    fill: rgb(25, 118, 210);
+    stroke: rgb(255, 255, 255);
+    stroke-width: 2;
+}
+
+.torqueHead {
+    fill: rgb(245, 124, 0);
+    stroke: rgb(255, 255, 255);
+    stroke-width: 2;
+}

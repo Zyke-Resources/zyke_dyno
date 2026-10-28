@@ -1,0 +1,1 @@
+dyno_sheet                   = { name = 'dyno_sheet', label = 'Dyno Sheet', weight = 10, type = 'item', image = 'dyno_sheet.png', unique = true, useable = true, shouldClose = true, description = 'A printed chassis dyno result.' },

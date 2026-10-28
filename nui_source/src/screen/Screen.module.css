@@ -1,0 +1,196 @@
+/* The screen's page, drawn at 1280x720 into the DUI. Flat and dark like a dyno cell's monitor, with large numbers for a
+   camera. Zyke's blue is the accent and power, its orange torque */
+/* The tiles sit edge to edge, as Lua reads each one's pixels from where it sits */
+.grid {
+    display: grid;
+    grid-auto-rows: 720px;
+}
+
+.screen {
+    width: 1280px;
+    height: 720px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background: rgb(17, 19, 21);
+    color: rgb(255, 255, 255);
+    font-family: var(--font);
+}
+
+.header {
+    height: 64px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 28px;
+    background: rgb(29, 31, 33);
+    border-bottom: 2px solid rgb(25, 118, 210);
+}
+
+.brand {
+    font-size: 26px;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.brand b {
+    color: rgb(25, 118, 210);
+}
+
+/* The car's name and its plate centred on one line, not sat on the text's baseline */
+.car {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.plate {
+    padding: 5px 10px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    font-size: 20px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.badge {
+    justify-self: end;
+    padding: 4px 14px;
+    background: rgb(25, 118, 210);
+    color: rgb(255, 255, 255);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 8px 18px 0 0;
+}
+
+.side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 10px;
+}
+
+.sideTitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.readout {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.readoutLabel {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 17px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.readoutValue {
+    font-size: 64px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.small .readoutValue {
+    font-size: 30px;
+}
+
+.small .readoutLabel {
+    font-size: 14px;
+}
+
+.readoutUnit {
+    margin-left: 8px;
+    font-size: 0.4em;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+}
+
+.power {
+    color: rgb(25, 118, 210);
+}
+
+.torque {
+    color: rgb(245, 124, 0);
+}
+
+.note {
+    margin-top: -6px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 16px;
+}
+
+.peaks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.legend {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    align-items: center;
+    gap: 6px 10px;
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.swatch {
+    height: 0;
+    border-top: 4px solid rgb(25, 118, 210);
+}
+
+.swatchPrevious {
+    border-top-style: dashed;
+    opacity: 0.6;
+}
+
+.swatchFirst {
+    border-top-style: dotted;
+    opacity: 0.5;
+}
+
+.standby {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+
+.standbyTitle {
+    color: rgb(25, 118, 210);
+    font-size: 96px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.standbyHint {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 28px;
+}

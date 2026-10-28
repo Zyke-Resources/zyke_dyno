@@ -1,0 +1,58 @@
+---@meta
+
+---@class ZykeDyno
+---@field coords vector3 @ The floor under where the front wheels stand, see shared/geometry.lua
+---@field heading number @ The way a vehicle's nose points on it
+---@field kind DynoKind
+---@field screen? {offset: vector3, heading: number} @ The screen beside it, in the dyno's frame
+---@field jobs? string[] | string @ Who may run it, over Config.Settings.dyno.jobs
+---@field label? string @ Its name in the laptop app
+---@field resource string @ The resource that stood it
+---@field placed? boolean @ Placed with the admin tool and saved in the database
+---@field run? ZykeDynoRun
+---@field last? DynoSheet @ The last finished run on it, which its screen shows until the next
+---@field starting? boolean
+
+---@alias DynoScreenSide "left" | "right" | "none" @ Where a placed dyno's screen stands, see Config.Settings.dyno.admin
+
+---@class ZykeDynoRun
+---@field id string
+---@field netId integer
+---@field plate string
+---@field label string
+---@field driver PlayerId
+---@field startAt integer @ The server's game timer when it started
+---@field seed integer
+---@field inputs DynoInputs
+---@field compare {previous?: DynoSheet, first?: DynoSheet}
+
+---@class DynoSheet
+---@field runId? string
+---@field rowId? integer
+---@field dynoId? integer
+---@field plate string
+---@field label string
+---@field model string
+---@field drive DynoDrive
+---@field driver? PlayerId
+---@field date integer @ Unix time
+---@field engineKw number
+---@field wheelKw number
+---@field wheelNm number
+---@field powerRpm number
+---@field torqueRpm number
+---@field loss? number
+---@field redlineSpeed? number @ Metres a second
+---@field gear? integer
+---@field curve {startRpm: number, redline: number, power: number[], torque: number[]}
+---@field compare? {previous?: DynoSheet, first?: DynoSheet}
+---@field gain? {wheelKw: number, wheelNm: number} @ Against the car's last run
+---@field description? string @ What a printed sheet's item shows in the inventory
+---@field car? string @ The car's name on a printed sheet, kept off label, which ox_inventory shows as the item's name
+
+---@class DynoRunCheckData
+---@field plyId PlayerId
+---@field dynoId integer
+---@field vehicle integer
+---@field plate string
+---@field inputs DynoInputs

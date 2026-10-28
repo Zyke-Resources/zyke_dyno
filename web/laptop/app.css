@@ -1,0 +1,611 @@
+/* The app follows the laptop's theme through the SDK's --laptop-* variables; power is Zyke's blue and torque its orange as
+   on the dyno's screen, and the runs a run is laid over are the same colours, dimmer */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: var(--laptop-window-bg, #242424);
+    --fg: var(--laptop-window-fg, #ffffff);
+    --view: var(--laptop-view-bg, #1e1e1e);
+    --card: var(--laptop-card-bg, rgba(255, 255, 255, 0.08));
+    --border: var(--laptop-borders, rgba(255, 255, 255, 0.15));
+    --dim: var(--laptop-dim-fg, rgba(255, 255, 255, 0.55));
+    --hover: var(--laptop-hover-bg, rgba(255, 255, 255, 0.07));
+    --button: var(--laptop-button-bg, rgba(255, 255, 255, 0.1));
+    --accent: var(--laptop-accent-bg, #3584e4);
+    --accent-fg: var(--laptop-accent-fg, #ffffff);
+    --radius: var(--laptop-radius, 10px);
+    --radius-control: var(--laptop-radius-control, 6px);
+    --control-height: var(--laptop-control-height, 32px);
+    --power: rgb(25, 118, 210);
+    --torque: rgb(245, 124, 0);
+    --success: var(--laptop-success, #26a269);
+    --error: var(--laptop-error, #e01b24);
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--laptop-font, system-ui, sans-serif);
+    font-size: 14px;
+    line-height: 1.4;
+    opacity: 0;
+}
+
+body.ready {
+    opacity: 1;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.title-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.title {
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.icon-btn {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--dim);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: var(--hover);
+    color: var(--fg);
+}
+
+.icon-btn.rename::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.rename-input {
+    width: 220px;
+    height: var(--control-height);
+    padding: 0 10px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-control);
+    outline: none;
+    background: var(--view);
+    color: var(--fg);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.rename-hint {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+#status {
+    display: flex;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.tabs button,
+.btn {
+    height: var(--control-height);
+    padding: 0 14px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: var(--button);
+    cursor: pointer;
+}
+
+.tabs button {
+    background: transparent;
+}
+
+.tabs button:hover,
+.btn:hover {
+    background: var(--hover);
+}
+
+.tabs button[aria-selected="true"] {
+    background: var(--button);
+    font-weight: 700;
+}
+
+.btn.primary {
+    background: var(--accent);
+    color: var(--accent-fg);
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    background: rgba(224, 27, 36, 0.22);
+}
+
+.content {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 14px;
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+
+.empty-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.dim {
+    color: var(--dim);
+}
+
+.plate {
+    margin-inline-start: 6px;
+    padding: 0 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--laptop-font-mono, monospace);
+    font-size: 0.9em;
+}
+
+.chip,
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--button);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    flex: none;
+}
+
+.chip.free,
+.chip.done {
+    background: rgba(38, 162, 105, 0.25);
+}
+
+.chip.running,
+.chip.pull,
+.chip.limiter {
+    background: rgba(245, 124, 0, 0.3);
+}
+
+.chip.stopped {
+    background: rgba(224, 27, 36, 0.25);
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* The list of dynos */
+.dyno-section + .dyno-section {
+    margin-top: 20px;
+}
+
+.dyno-section-title {
+    margin: 0 0 10px;
+    color: var(--dim);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.dyno-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.dyno-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+}
+
+.dyno-card.unreachable {
+    opacity: 0.7;
+}
+
+.dyno-card-top,
+.dyno-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.dyno-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.dyno-card-title {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.own-name {
+    font-size: 12px;
+}
+
+.dyno-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* The graph */
+.graph-box {
+    flex: 1;
+    min-width: 0;
+    min-height: 220px;
+}
+
+.graph {
+    display: block;
+    overflow: visible;
+}
+
+.graph .grid {
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.graph .tick,
+.graph .axis {
+    fill: var(--dim);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.graph .axis {
+    text-transform: uppercase;
+}
+
+.graph .power {
+    fill: var(--power);
+}
+
+.graph .torque {
+    fill: var(--torque);
+}
+
+.graph .line {
+    fill: none;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.graph .power-line {
+    stroke: var(--power);
+}
+
+.graph .torque-line {
+    stroke: var(--torque);
+}
+
+.graph .previous .line {
+    stroke-width: 2;
+    stroke-dasharray: 8 6;
+    opacity: 0.5;
+}
+
+.graph .first .line {
+    stroke-width: 2;
+    stroke-dasharray: 2 5;
+    opacity: 0.45;
+}
+
+.graph .power-head {
+    fill: var(--power);
+}
+
+.graph .torque-head {
+    fill: var(--torque);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    color: var(--dim);
+    font-size: 12px;
+}
+
+.legend-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.swatch {
+    width: 22px;
+    border-top: 3px solid var(--power);
+}
+
+.swatch.previous {
+    border-top-style: dashed;
+    opacity: 0.6;
+}
+
+.swatch.first {
+    border-top-style: dotted;
+    opacity: 0.6;
+}
+
+/* The live run */
+.live,
+.sheet,
+.history {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+}
+
+.live-top,
+.sheet-top,
+.history-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.sheet-car {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.live-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 16px;
+}
+
+.side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 230px;
+    flex: none;
+}
+
+.peaks {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.readout {
+    display: flex;
+    flex-direction: column;
+}
+
+.readout-label {
+    overflow-wrap: anywhere;
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.readout-value {
+    font-size: 26px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.peaks .readout-value {
+    font-size: 17px;
+}
+
+.readout-unit {
+    margin-inline-start: 4px;
+    color: var(--dim);
+    font-size: 0.55em;
+}
+
+.readout-value.power,
+.stat-value.power,
+.run-row .power {
+    color: var(--power);
+}
+
+.readout-value.torque,
+.stat-value.torque,
+.run-row .torque {
+    color: var(--torque);
+}
+
+/* A result sheet */
+.sheet-title {
+    color: var(--power);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sheet-date {
+    flex: 1;
+    color: var(--dim);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-radius: var(--radius-control);
+    background: var(--card);
+}
+
+.stat-label {
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.stat-value.gain {
+    color: var(--success);
+}
+
+.stat-value.loss {
+    color: var(--error);
+}
+
+.stat-note {
+    color: var(--dim);
+    font-size: 12px;
+}
+
+/* The history */
+.history-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.runs {
+    display: flex;
+    flex-direction: column;
+}
+
+.run-row {
+    display: grid;
+    grid-template-columns: 1.2fr 2fr 1fr 1fr 0.6fr;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 10px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    text-align: start;
+    cursor: pointer;
+}
+
+.run-row:hover {
+    background: var(--hover);
+}
+
+.run-row.head {
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: default;
+}
+
+.run-row.head:hover {
+    background: transparent;
+}

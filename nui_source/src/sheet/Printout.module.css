@@ -1,0 +1,208 @@
+/* The result as a printed page: off-white paper with a little tilt and shadow, black laser text and coloured ink
+   for the runs. Sizes are the page's own at 96 dpi; Printout.tsx scales the page to the screen */
+.wrapper {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* Out of view below the middle and see-through; .shown slides it up into place. 320 ms, see useShownSheet.ts */
+.slide {
+    flex: none;
+    opacity: 0;
+    transform: translateY(18vh) rotate(2deg);
+    transition: transform 320ms cubic-bezier(0.2, 0.8, 0.25, 1), opacity 240ms ease-out;
+}
+
+.slide.shown {
+    opacity: 1;
+    transform: none;
+}
+
+.page {
+    flex: none;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 38px 48px 30px;
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.6), transparent 60%),
+        linear-gradient(170deg, #fbfaf6 0%, #f4f2ec 100%);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.25), 0 24px 60px rgba(0, 0, 0, 0.55);
+    color: #1c1c1c;
+    font-family: Arial, Helvetica, "Segoe UI", "Microsoft YaHei", "Leelawadee UI", sans-serif;
+    font-size: 13px;
+}
+
+.titleRow {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #1c1c1c;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.subtitle {
+    margin-top: 2px;
+    color: #555;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+}
+
+.stamp,
+.runs td,
+.peaks td,
+.detailValue {
+    font-family: Consolas, "Courier New", monospace;
+}
+
+.stamp {
+    font-size: 14px;
+}
+
+.details {
+    display: flex;
+    gap: 34px;
+    margin-top: 10px;
+}
+
+.detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detailLabel {
+    color: #666;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.detailValue {
+    font-size: 15px;
+}
+
+.peaks,
+.runs {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.peaks {
+    margin-top: 12px;
+}
+
+.peaks th,
+.runs th {
+    padding: 4px 8px;
+    border: 1px solid #2a2a2a;
+    background: #e6e3db;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.peaks td,
+.runs td {
+    padding: 5px 8px;
+    border: 1px solid #2a2a2a;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.peaks b {
+    font-size: 18px;
+}
+
+.swatch {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.graph {
+    display: block;
+    align-self: center;
+    overflow: visible;
+}
+
+.gridMajor {
+    stroke: #9a978f;
+    stroke-width: 0.8;
+}
+
+.gridMinor {
+    stroke: #d6d3cb;
+    stroke-width: 0.6;
+}
+
+.plotBorder {
+    fill: none;
+    stroke: #2a2a2a;
+    stroke-width: 1.2;
+}
+
+.tick {
+    fill: #333;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11px;
+}
+
+.axisTitle {
+    fill: #1c1c1c;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.powerInk,
+.torqueInk {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.torqueInk {
+    stroke-dasharray: 7 4;
+}
+
+.inkLive .powerInk {
+    stroke-width: 2.4;
+}
+
+.inkLive .torqueInk {
+    stroke-width: 2;
+}
+
+.inkOld {
+    opacity: 0.8;
+}
+
+.inkOld .powerInk,
+.inkOld .torqueInk {
+    stroke-width: 1.4;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 6px;
+    border-top: 1px solid #9a978f;
+    color: #555;
+    font-size: 10px;
+}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Dyno</title>
+        <link rel="stylesheet" href="app.css" />
+        <script src="https://cfx-nui-zyke_laptop/nui/sdk/laptop.js"></script>
+        <script type="module" src="app.js"></script>
+    </head>
+    <body>
+        <div class="app">
+            <header class="toolbar">
+                <div class="title-box" id="title"></div>
+                <span id="status"></span>
+                <nav class="tabs" id="tabs" role="tablist" hidden>
+                    <button type="button" role="tab" data-tab="live" data-t="laptop:tabLive"></button>
+                    <button type="button" role="tab" data-tab="result" data-t="laptop:tabResult"></button>
+                    <button type="button" role="tab" data-tab="history" data-t="laptop:tabHistory"></button>
+                </nav>
+                <span class="spacer"></span>
+                <button type="button" class="btn" id="refresh" data-t="laptop:refresh"></button>
+                <button type="button" class="btn" id="disconnect" data-t="laptop:disconnect" hidden></button>
+            </header>
+            <div class="error" id="error" role="alert" hidden></div>
+            <main class="content" id="content"></main>
+        </div>
+    </body>
+</html>
