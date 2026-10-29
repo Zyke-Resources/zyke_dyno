@@ -1,5 +1,5 @@
--- The Dyno app for zyke_laptop, added only while that resource runs, with its page in web/laptop/. The server
--- checks every request again, see server/laptop.lua
+-- The Dyno app's page in web/laptop/ and its live run. server/laptop.lua registers the app and checks every
+-- request again
 
 local settings = Config.Settings.dyno
 if (not settings.laptop.enabled) then return end
@@ -15,7 +15,6 @@ local pageTimeoutMs = 12000
 local connectedId
 local pageSeenAt = 0
 local following = false
-local registered = false
 
 -- Read by client/run.lua, which plays the run on the connected dyno however far away it is, for its live graph
 DynoLaptop = {}
@@ -23,40 +22,6 @@ DynoLaptop = {}
 ---@return integer? dynoId
 function DynoLaptop.getConnected()
     return connectedId
-end
-
----@return boolean mayUse @ The player's job may connect to at least one dyno
-local function mayUseAny()
-    for _, dyno in pairs(GetDynos()) do
-        local jobs = dyno.jobs or settings.jobs
-        if (not jobs or Z.isJob(jobs)) then return true end
-    end
-
-    return false
-end
-
--- RegisterApp only adds the app on this client, so each client checks its own job. The server checks it again on
--- every request
----@param force? boolean @ Registers again even when nothing changed, as the laptop forgets apps when it restarts
-local function syncApp(force)
-    if (GetResourceState("zyke_laptop") ~= "started") then return end
-
-    local wanted = mayUseAny()
-    if (wanted == registered and not force) then return end
-
-    registered = wanted
-
-    if (not wanted) then return exports.zyke_laptop:UnregisterApp(appId) end
-
-    exports.zyke_laptop:RegisterApp({
-        id = appId,
-        label = T("laptop:appName"),
-        icon = "gauge",
-        category = "utilities",
-        description = T("laptop:appDescription"),
-        ui = "web/laptop/index.html",
-        window = {width = 1000, height = 660, minWidth = 680, minHeight = 480, resizable = true},
-    })
 end
 
 -- The live run without what the page already has: the overlay runs come once per run, and only the points
@@ -156,30 +121,3 @@ for i = 1, #serverEndpoints do
         cb(result)
     end)
 end
-
--- Called without arguments, as anything in force would register the app again on every change
-OnDynosChange(function()
-    syncApp()
-end)
-
-AddEventHandler("zyke_lib:OnCharacterSelect", function()
-    syncApp()
-end)
-
-RegisterNetEvent("zyke_lib:OnJobUpdate", function()
-    syncApp()
-end)
-
--- Fired when zyke_laptop starts, after this resource or again after it restarts. The job is read once zyke_lib's
--- loader is done
-AddEventHandler("zyke_laptop:Ready", function()
-    while (not HasLoaderFinished) do Wait(10) end
-
-    syncApp(true)
-end)
-
-CreateThread(function()
-    while (not HasLoaderFinished) do Wait(10) end
-
-    syncApp(true)
-end)

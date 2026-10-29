@@ -1,15 +1,21 @@
--- Connections to dynos from the zyke_laptop app. Every request checks again that the player is at a laptop and may
--- connect. The app only reads, it never starts or stops a run
+-- The zyke_laptop app's registration and its connections to dynos. Every request checks again that the player is at
+-- a laptop and may connect. The app only reads, it never starts or stops a run
 
 local settings = Config.Settings.dyno
 local laptop = settings.laptop
 if (not laptop.enabled) then return end
+
+local appId = "zyke_dyno"
 
 -- Runs a history list holds at most
 local historyLimit = 20
 
 ---@type table<PlayerId, integer> @ The dyno each player is connected to
 local connections = {}
+
+-- The access the app was last registered with, see DynoLaptop.syncApp
+---@type string?
+local registeredAccess
 
 -- Read by server/dynos.lua, which passes a run's samples on to the players following it from a laptop
 DynoLaptop = {}
@@ -19,6 +25,66 @@ DynoLaptop = {}
 ---@return boolean connected
 function DynoLaptop.isConnected(plyId, dynoId)
     return connections[plyId] == dynoId
+end
+
+-- Every job that may connect to at least one dyno, at the lowest grade any of them takes. The app's access rule can
+-- only hold this union, so the requests check each dyno's own jobs again in hasAccess
+---@return table<string, integer>? jobs @ Nil when a dyno is open to everyone
+---@return string key @ The same rule as one comparable string, "none" when there is no dyno
+local function getAccessJobs()
+    local union = {}
+    local names = {}
+
+    for _, dyno in pairs(GetDynos()) do
+        local jobs = dyno.jobs or settings.jobs
+        if (not jobs) then return nil, "open" end
+
+        if (type(jobs) == "string" or jobs.name) then jobs = {jobs} end
+
+        for i = 1, #jobs do
+            local job = jobs[i]
+            local name = type(job) == "table" and job.name or job
+            local grade = type(job) == "table" and math.tointeger(job.minGrade) or 0
+
+            if (not union[name]) then names[#names + 1] = name end
+
+            union[name] = math.min(union[name] or grade, grade)
+        end
+    end
+
+    if (#names == 0) then return nil, "none" end
+
+    table.sort(names)
+
+    for i = 1, #names do
+        names[i] = names[i] .. "=" .. union[names[i]]
+    end
+
+    return union, table.concat(names, ",")
+end
+
+-- Registers the app with the jobs the dynos allow now, or takes it away while there is no dyno
+---@param force? boolean @ Registers again even when the access did not change, as the laptop forgets apps when it restarts
+function DynoLaptop.syncApp(force)
+    if (GetResourceState("zyke_laptop") ~= "started") then return end
+
+    local jobs, key = getAccessJobs()
+    if (key == registeredAccess and not force) then return end
+
+    registeredAccess = key
+
+    if (key == "none") then return exports.zyke_laptop:UnregisterApp(appId) end
+
+    exports.zyke_laptop:RegisterApp({
+        id = appId,
+        label = T("laptop:appName"),
+        icon = "gauge",
+        category = "utilities",
+        description = T("laptop:appDescription"),
+        ui = "web/laptop/index.html",
+        window = {width = 1000, height = 660, minWidth = 680, minHeight = 480, resizable = true},
+        access = jobs and {jobs = jobs} or nil,
+    })
 end
 
 ---@class DynoLaptopEntry
@@ -325,3 +391,10 @@ end)
 AddEventHandler("playerDropped", function()
     connections[source] = nil
 end)
+
+-- The laptop drops every app when it restarts and fires this once it is back
+AddEventHandler("zyke_laptop:Ready", function()
+    DynoLaptop.syncApp(true)
+end)
+
+DynoLaptop.syncApp(true)

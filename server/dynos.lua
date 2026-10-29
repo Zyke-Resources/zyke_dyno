@@ -34,6 +34,9 @@ local runChecks = {}
 
 local function publish()
     GlobalState.zykeDynos = dynos
+
+    -- The laptop app's access follows the dynos' jobs
+    if (DynoLaptop) then DynoLaptop.syncApp() end
 end
 
 ---@return table<integer, ZykeDyno> dynos
