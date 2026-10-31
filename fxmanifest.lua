@@ -3,7 +3,7 @@ game "gta5"
 author "https://discord.zykeresources.com"
 description "A chassis dyno with an open formula: a live power and torque graph on a screen beside it, history by plate, printed sheets and an export surface for integrations"
 lua54 "yes"
-version "1.0.0"
+version "1.0.1"
 
 shared_scripts {
     "@zyke_lib/imports.lua",
