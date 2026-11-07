@@ -5,6 +5,14 @@ description "A chassis dyno with an open formula: a live power and torque graph 
 lua54 "yes"
 version "1.0.1"
 
+-- zyke_lib systems this resource uses, zyke_lib only waits for these while it starts
+zyke_systems {
+    "framework",
+    "inventory",
+    "target",
+    "notification",
+}
+
 shared_scripts {
     "@zyke_lib/imports.lua",
     "shared/config.lua",
