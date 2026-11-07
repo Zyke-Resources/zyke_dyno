@@ -64,15 +64,23 @@ function DynoScreen.send(dynoId, message)
     dui:sendMessage({event = message.event, slot = slot, data = message.data})
 end
 
--- What the screen shows between runs: the last result on this dyno, if there is one, and how to get on it
+-- The standby hint says how to get on this dyno's kind
 ---@param dynoId integer
-local function sendStandby(dynoId)
+local function sendLabels(dynoId)
     local dyno = GetDynos()[dynoId]
     local labels = DynoNui.getLabels()
 
     labels.standbyHint = T(DynoGeometry.get(dyno and dyno.kind).locale.standby)
 
     DynoScreen.send(dynoId, {event = "Labels", data = {labels = labels, units = settings.units}})
+end
+
+-- What the screen shows between runs: the last result on this dyno, if there is one, and how to get on it
+---@param dynoId integer
+local function sendStandby(dynoId)
+    local dyno = GetDynos()[dynoId]
+
+    sendLabels(dynoId)
     DynoScreen.send(dynoId, {event = "Standby", data = {last = dyno and dyno.last}})
 end
 
@@ -314,6 +322,13 @@ end
 OnDynosChange(function(dynos)
     for dynoId in pairs(slotOf) do
         if (dynos[dynoId] and not dynos[dynoId].run) then sendStandby(dynoId) end
+    end
+end)
+
+-- Only the labels are sent again, so a run playing on a screen goes on
+Z.onLanguageChange(function()
+    for dynoId in pairs(slotOf) do
+        sendLabels(dynoId)
     end
 end)
 

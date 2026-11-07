@@ -216,6 +216,21 @@ local function refreshTargets()
     end
 end
 
+local function registerPrintKey()
+    Z.registerKey(printKey, settings.keys.printSheet, T("keymap:printSheet"), onPrintKey)
+end
+
+-- Target options and interest points keep the label they were added with, both loops add them again
+Z.onLanguageChange(function()
+    for dynoId, entity in pairs(targets) do
+        Z.target.remove(entity)
+
+        targets[dynoId] = nil
+    end
+
+    clearPoints()
+end)
+
 -- Target is set by zyke_lib's loader, so the mode is picked once it has finished
 CreateThread(function()
     while (not HasLoaderFinished) do Wait(10) end
@@ -232,7 +247,8 @@ CreateThread(function()
         print(("^3[%s] interaction is set to \"target\" but neither ox_target nor qb-target is started, using interaction points^7"):format(ResName))
     end
 
-    Z.registerKey(printKey, settings.keys.printSheet, T("keymap:printSheet"), onPrintKey)
+    registerPrintKey()
+    Z.onLanguageChange(registerPrintKey)
 
     while (true) do
         Wait(refreshPoints() and nearMs or idleMs)

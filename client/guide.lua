@@ -186,7 +186,12 @@ RegisterNetEvent("zyke_dyno:RequestRun", function(dynoId)
     if (not requested) then notifyReason(reason) end
 end)
 
-Z.keybinds.addKeyMapping("zyke_dyno_startRun", T("keymap:startRun"), settings.keys.startRun)
+local function registerStartKey()
+    Z.keybinds.addKeyMapping("zyke_dyno_startRun", T("keymap:startRun"), settings.keys.startRun)
+end
+
+registerStartKey()
+Z.onLanguageChange(registerStartKey)
 
 -- Runs while the player's vehicle stands on a dyno's deck with no run of its own on. How it stands is checked every
 -- lineUpMs and the panel only sent again when what it says changed; between checks only the start key and the strip

@@ -13,6 +13,12 @@ export async function start() {
     const [, data] = await Promise.all([window.Laptop.ready(), window.Laptop.post("dyno:Setup").catch(() => null)]);
 
     Object.assign(setup, data || {});
+    setStrings(setup.strings);
+}
+
+// Fills the page's fixed words, again when the player changes language
+export function setStrings(strings) {
+    setup.strings = strings || {};
     document.title = t("laptop:appName");
     document.querySelectorAll("[data-t]").forEach((node) => (node.textContent = t(node.dataset.t)));
     document.querySelectorAll("[data-t-label]").forEach((node) => {

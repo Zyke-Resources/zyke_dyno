@@ -1,7 +1,7 @@
 // The Dyno app: pick a dyno, connect to it, then follow its live run, read its last result and its history. It
 // opens on the dyno it was last connected to, and lists the ones connected to before first. The server checks every
 // request, and client/laptop.lua sends the live run here while the page is connected
-import { start, call, t, el, dynoName, ownName } from "./page.js";
+import { start, call, t, el, dynoName, ownName, setStrings } from "./page.js";
 import { renderList } from "./list.js";
 import { renderLive } from "./live.js";
 import { renderSheet } from "./sheet.js";
@@ -263,11 +263,19 @@ function onLiveEnd(data) {
     schedule(loadStatus, resultDelayMs);
 }
 
+// client/laptop.lua sends the new words when the player changes language
+function onStrings(strings) {
+    setStrings(strings);
+    showError(state.error);
+    draw();
+}
+
 await start();
 
 window.Laptop.on("message", (message) => {
     if (message?.event === "Live") onLive(message.data);
     if (message?.event === "LiveEnd") onLiveEnd(message.data);
+    if (message?.event === "Strings") onStrings(message.data);
 });
 
 tabsNode.querySelectorAll("[data-tab]").forEach((button) =>

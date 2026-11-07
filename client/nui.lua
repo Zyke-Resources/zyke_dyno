@@ -19,9 +19,16 @@ function DynoNui.showSheet(sheet)
     SendNUIMessage({event = "Sheet", data = sheet or {}})
 end
 
+local function sendLabels()
+    SendNUIMessage({event = "Labels", data = {labels = DynoNui.getLabels(), units = Config.Settings.dyno.units}})
+end
+
 ---@param _ table
 ---@param cb fun(result: table)
 RegisterNUICallback("Ready", function(_, cb)
-    SendNUIMessage({event = "Labels", data = {labels = DynoNui.getLabels(), units = Config.Settings.dyno.units}})
+    sendLabels()
     cb({})
 end)
+
+-- The page asks for its labels only once, when it has loaded
+Z.onLanguageChange(sendLabels)

@@ -104,6 +104,13 @@ RegisterNUICallback("dyno:Setup", function(_, cb)
     cb({strings = getStrings(), units = settings.units})
 end)
 
+-- An open app asks for its words only when it starts
+Z.onLanguageChange(function()
+    if (GetResourceState("zyke_laptop") ~= "started") then return end
+
+    exports.zyke_laptop:SendAppMessage(appId, {event = "Strings", data = getStrings()})
+end)
+
 for i = 1, #serverEndpoints do
     local endpoint = serverEndpoints[i]
 

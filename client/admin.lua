@@ -529,10 +529,15 @@ local function runFrame(session)
     Z.keybinds.handle(session.keybinds)
 end
 
-Z.keybinds.addKeyMapping("zyke_dyno_placeLine", T("keymap:placeLine"), keys.placeLine)
-Z.keybinds.addKeyMapping("zyke_dyno_placeScreen", T("keymap:placeScreen"), keys.placeScreen)
-Z.keybinds.addKeyMapping("zyke_dyno_placeKind", T("keymap:placeKind"), keys.placeKind)
-Z.keybinds.addKeyMapping("zyke_dyno_placeMode", T("keymap:placeMode"), keys.placeMode)
+local function registerPlaceKeys()
+    Z.keybinds.addKeyMapping("zyke_dyno_placeLine", T("keymap:placeLine"), keys.placeLine)
+    Z.keybinds.addKeyMapping("zyke_dyno_placeScreen", T("keymap:placeScreen"), keys.placeScreen)
+    Z.keybinds.addKeyMapping("zyke_dyno_placeKind", T("keymap:placeKind"), keys.placeKind)
+    Z.keybinds.addKeyMapping("zyke_dyno_placeMode", T("keymap:placeMode"), keys.placeMode)
+end
+
+registerPlaceKeys()
+Z.onLanguageChange(registerPlaceKeys)
 
 -- Takes the tool out until the admin puts it away
 RegisterNetEvent("zyke_dyno:PlaceDyno", function()
